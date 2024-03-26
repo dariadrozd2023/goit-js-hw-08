@@ -70,39 +70,45 @@ galleryList.addEventListener('click', showLargeImg);
 
 function showLargeImg(event) {
   event.preventDefault();
-  // event.stopPropagation();
   if (event.target.nodeName !== 'IMG') {
     return;
   }
 
-  const instance = basicLightbox.create(
-    `<img src="${event.target.src}" width="800" height="600">`
+ instance = basicLightbox.create(
+    `<img src="${event.target.getAttribute(
+      'data-source'
+    )}" width="800" height="600">`,
+    {
+      onShow: () => {
+        document.addEventListener('keydown', handleEscapeKeyPress);
+      },
+      onClose: () => {
+        document.removeEventListener('keydown', handleEscapeKeyPress);
+      },
+    }
   );
   instance.show();
+}
 
-  galleryList.addEventListener('keydown', (event) => {
-    if (event.code === 'Escape') {
-      instance.close();
-    }
-  });
+function handleEscapeKeyPress(event) {
+  if (event.code === 'Escape') {
+    instance.close();
+  }
 }
 
 const galleryImagesHTML = images
   .map(({ preview, original, description }) => {
     return `<li class="gallery-item">
-  <a class="gallery-link" href="${preview}">
-    <img
-      class="gallery-image"
-      src="${original}"
-      data-source="large-image.jpg"
-      alt="${description}"
-    />
-  </a>
-</li>
-`;
+      <a class="gallery-link" href="${original}">
+        <img
+          class="gallery-image"
+          src="${preview}"
+          data-source="${original}"
+          alt="${description}"
+        />
+      </a>
+    </li>`;
   })
   .join('');
 
 galleryList.innerHTML = galleryImagesHTML;
-
-
